@@ -1,70 +1,25 @@
-# US-006 — Dockerización multi-stage de frontend React para despliegue ligero con Nginx
-
----
+# Estandarización de categorías de reconocimiento en el envío de Kudos
 
 ## Descripción
 
-**Como** persona de operaciones,
-**quiero** dockerizar la aplicación frontend utilizando un build multi-stage,
-**para** compilar el código fuente aislado y servir estáticos de forma ultraligera en producción.
+**Como** Empleado Sofkian,
+**quiero** seleccionar una categoría de una lista predefinida al enviar un reconocimiento,
+**para** asegurar la consistencia en los criterios de premiación y garantizar la correcta asignación de puntos en el sistema de gamificación.
 
 ---
 
-## Criterios de Aceptación
+## Criterios de aceptación
 
-**CA-01 — Construcción de imagen**
-
-- **Dado que** el código fuente React 19.2.0 se encuentra en el entorno de construcción Node.js 20 Alpine,
-- **Cuando** se ejecuta el comando de build de Vite 7.2.4,
-- **Entonces** el proceso debe generar el directorio `/dist/` conteniendo el archivo `index.html` y los activos minificados.
-
----
-
-**CA-02 — Etapa de producción**
-
-- **Dado que** los archivos estáticos han sido generados en la etapa de builder,
-- **Cuando** se transfieren a la imagen base de Nginx Alpine,
-- **Entonces** los archivos deben estar alojados en `/usr/share/nginx/html/` y el binario de Node.js no debe estar presente en el PATH del sistema.
+- El formulario de envío de Kudos debe incluir un componente de selección obligatoria que contenga las categorías fijas definidas por el negocio.
+- El sistema debe impedir el envío del formulario y mostrar un aviso de validación si el usuario no ha seleccionado una categoría de la lista.
+- El Producer API debe validar que la categoría recibida pertenezca al catálogo autorizado antes de retornar el código `202` y publicar el evento en el Message Broker.
+- Si se recibe una categoría inexistente o inválida a través de la API, el sistema debe responder con un error de solicitud incorrecta (`400`) detallando el fallo.
+- La categoría seleccionada debe ser persistida y visualizada claramente en el muro público junto con el mensaje del reconocimiento.
 
 ---
 
-**CA-03 — Seguridad y limpieza de imagen**
+## Notas y preguntas abiertas
 
-- **Dado que** la imagen de producción ha sido creada,
-- **Cuando** se inspecciona el contenido de la imagen final,
-- **Entonces** no deben existir archivos con extensión `.ts`, `.tsx` ni la carpeta `node_modules`, manteniendo un tamaño total de imagen inferior a 50MB.
-
----
-
-**CA-04 — Configuración SPA / enrutamiento**
-
-- **Dado que** la aplicación es una Single Page Application (SPA),
-- **Cuando** se solicita una ruta no existente físicamente en el servidor,
-- **Entonces** Nginx debe redirigir la petición al archivo `index.html` devolviendo un código de estado HTTP 200.
-
----
-
-**CA-05 — Validación del servicio**
-
-- **Dado que** el contenedor se encuentra en ejecución escuchando en el puerto 80,
-- **Cuando** se realiza una petición HTTP GET a la dirección del host,
-- **Entonces** el servidor debe responder con un código de estado HTTP 200 y el encabezado de respuesta debe identificar el servidor como Nginx.
-
----
-
-## Definición de Hecho (DoD)
-
-- [ ] Instalación de dependencias realizada como capa independiente en etapa constructora.
-- [ ] Imagen final carente de runtime de Node y código fuente base.
-- [ ] Configuración embebida vía `nginx.conf`.
-- [ ] Exposición del puerto **80** funcional mediante script inicial predefinido.
-
----
-
-## Notas Técnicas
-
-- Uso de Multi-Stage Build estático.
-- Node.js 20 (Alpine) y Nginx (Alpine) como imágenes base obligatorias.
-- Versiones de referencia: React 19.2.0 / Vite 7.2.4 (no deben hardcodearse en los CAs ante actualizaciones).
-- **RT-007:** Node.js LTS requerido para desarrollo.
-- **RT-004:** El frontend proxya `/api` hacia el backend únicamente en entorno de desarrollo; no aplica en la imagen de producción.
+- Dado que las categorías estarán quemadas en el código por ahora debido a las limitaciones del MVP, se debe documentar su ubicación para facilitar futuras actualizaciones.
+- El equipo debe acordar si se mostrarán iconos representativos para cada categoría para fortalecer la identidad visual.
+- Se asume que no hay autenticación todavía, por lo que la validación de la categoría es el control principal de integridad en este flujo.
