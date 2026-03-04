@@ -1,25 +1,27 @@
-# Estandarización de categorías de reconocimiento en el envío de Kudos
+# HU - 006 Refined
+
+# Optimización y contenedorización del frontend de SofkianOS para despliegue productivo
 
 ## Descripción
 
-**Como** Empleado Sofkian,
-**quiero** seleccionar una categoría de una lista predefinida al enviar un reconocimiento,
-**para** asegurar la consistencia en los criterios de premiación y garantizar la correcta asignación de puntos en el sistema de gamificación.
+**Como** desarrollador del equipo de infraestructura,
+**quiero** automatizar la creación de una imagen Docker liviana mediante una construcción multi-etapa,
+**para** reducir los tiempos de despliegue, minimizar la superficie de ataque y asegurar que el frontend se sirva eficientemente mediante Nginx.
 
 ---
 
 ## Criterios de aceptación
 
-- El formulario de envío de Kudos debe incluir un componente de selección obligatoria que contenga las categorías fijas definidas por el negocio.
-- El sistema debe impedir el envío del formulario y mostrar un aviso de validación si el usuario no ha seleccionado una categoría de la lista.
-- El Producer API debe validar que la categoría recibida pertenezca al catálogo autorizado antes de retornar el código `202` y publicar el evento en el Message Broker.
-- Si se recibe una categoría inexistente o inválida a través de la API, el sistema debe responder con un error de solicitud incorrecta (`400`) detallando el fallo.
-- La categoría seleccionada debe ser persistida y visualizada claramente en el muro público junto con el mensaje del reconocimiento.
+- El `Dockerfile` debe utilizar una etapa de construcción inicial basada en **Node JS LTS** para compilar la aplicación React y transformar el código TypeScript.
+- La etapa final de ejecución debe utilizar una imagen de **Nginx Alpine** para servir únicamente los archivos estáticos generados en el build.
+- El contenedor resultante no debe incluir el código fuente, dependencias de desarrollo ni herramientas del sistema operativo que no sean estrictamente necesarias.
+- Se debe incluir un archivo `.dockerignore` para evitar que la carpeta `node_modules` local y otros archivos de configuración innecesarios se copien al contexto de construcción.
+- La configuración de Nginx dentro del contenedor debe permitir la recarga de rutas directas para soportar el funcionamiento de **React Router** sin errores de archivo no encontrado.
+- La imagen debe integrarse correctamente en el archivo `docker-compose` del proyecto y responder en el puerto configurado sin bloqueos.
 
 ---
 
 ## Notas y preguntas abiertas
 
-- Dado que las categorías estarán quemadas en el código por ahora debido a las limitaciones del MVP, se debe documentar su ubicación para facilitar futuras actualizaciones.
-- El equipo debe acordar si se mostrarán iconos representativos para cada categoría para fortalecer la identidad visual.
-- Se asume que no hay autenticación todavía, por lo que la validación de la categoría es el control principal de integridad en este flujo.
+- El equipo debe decidir si el escaneo de vulnerabilidades de la imagen se realizará dentro del `Dockerfile` o como un paso independiente en el pipeline de Jenkins.
+- Queda pendiente definir si se usará una imagen espejo interna para las dependencias de Node por motivos de seguridad corporativa.

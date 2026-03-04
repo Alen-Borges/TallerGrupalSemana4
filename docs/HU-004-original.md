@@ -1,0 +1,3 @@
+# HU - 004 Original
+
+Quiero que los reconocimientos que damos (kudos) tengan categorías claras y fijas, para que no haya errores al escribirlas y todos usemos los mismos criterios al premiar el talento de nuestros compañeros.
