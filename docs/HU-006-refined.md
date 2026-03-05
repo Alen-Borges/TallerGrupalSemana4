@@ -1,70 +1,27 @@
-# US-006 — Dockerización multi-stage de frontend React para despliegue ligero con Nginx
+# HU - 006 Refined
 
----
+# Optimización y contenedorización del frontend de SofkianOS para despliegue productivo
 
 ## Descripción
 
-**Como** persona de operaciones,
-**quiero** dockerizar la aplicación frontend utilizando un build multi-stage,
-**para** compilar el código fuente aislado y servir estáticos de forma ultraligera en producción.
+**Como** desarrollador del equipo de infraestructura,
+**quiero** automatizar la creación de una imagen Docker liviana mediante una construcción multi-etapa,
+**para** reducir los tiempos de despliegue, minimizar la superficie de ataque y asegurar que el frontend se sirva eficientemente mediante Nginx.
 
 ---
 
-## Criterios de Aceptación
+## Criterios de aceptación
 
-**CA-01 — Construcción de imagen**
-
-- **Dado que** el código fuente React 19.2.0 se encuentra en el entorno de construcción Node.js 20 Alpine,
-- **Cuando** se ejecuta el comando de build de Vite 7.2.4,
-- **Entonces** el proceso debe generar el directorio `/dist/` conteniendo el archivo `index.html` y los activos minificados.
-
----
-
-**CA-02 — Etapa de producción**
-
-- **Dado que** los archivos estáticos han sido generados en la etapa de builder,
-- **Cuando** se transfieren a la imagen base de Nginx Alpine,
-- **Entonces** los archivos deben estar alojados en `/usr/share/nginx/html/` y el binario de Node.js no debe estar presente en el PATH del sistema.
+- El `Dockerfile` debe utilizar una etapa de construcción inicial basada en **Node JS LTS** para compilar la aplicación React y transformar el código TypeScript.
+- La etapa final de ejecución debe utilizar una imagen de **Nginx Alpine** para servir únicamente los archivos estáticos generados en el build.
+- El contenedor resultante no debe incluir el código fuente, dependencias de desarrollo ni herramientas del sistema operativo que no sean estrictamente necesarias.
+- Se debe incluir un archivo `.dockerignore` para evitar que la carpeta `node_modules` local y otros archivos de configuración innecesarios se copien al contexto de construcción.
+- La configuración de Nginx dentro del contenedor debe permitir la recarga de rutas directas para soportar el funcionamiento de **React Router** sin errores de archivo no encontrado.
+- La imagen debe integrarse correctamente en el archivo `docker-compose` del proyecto y responder en el puerto configurado sin bloqueos.
 
 ---
 
-**CA-03 — Seguridad y limpieza de imagen**
+## Notas y preguntas abiertas
 
-- **Dado que** la imagen de producción ha sido creada,
-- **Cuando** se inspecciona el contenido de la imagen final,
-- **Entonces** no deben existir archivos con extensión `.ts`, `.tsx` ni la carpeta `node_modules`, manteniendo un tamaño total de imagen inferior a 50MB.
-
----
-
-**CA-04 — Configuración SPA / enrutamiento**
-
-- **Dado que** la aplicación es una Single Page Application (SPA),
-- **Cuando** se solicita una ruta no existente físicamente en el servidor,
-- **Entonces** Nginx debe redirigir la petición al archivo `index.html` devolviendo un código de estado HTTP 200.
-
----
-
-**CA-05 — Validación del servicio**
-
-- **Dado que** el contenedor se encuentra en ejecución escuchando en el puerto 80,
-- **Cuando** se realiza una petición HTTP GET a la dirección del host,
-- **Entonces** el servidor debe responder con un código de estado HTTP 200 y el encabezado de respuesta debe identificar el servidor como Nginx.
-
----
-
-## Definición de Hecho (DoD)
-
-- [ ] Instalación de dependencias realizada como capa independiente en etapa constructora.
-- [ ] Imagen final carente de runtime de Node y código fuente base.
-- [ ] Configuración embebida vía `nginx.conf`.
-- [ ] Exposición del puerto **80** funcional mediante script inicial predefinido.
-
----
-
-## Notas Técnicas
-
-- Uso de Multi-Stage Build estático.
-- Node.js 20 (Alpine) y Nginx (Alpine) como imágenes base obligatorias.
-- Versiones de referencia: React 19.2.0 / Vite 7.2.4 (no deben hardcodearse en los CAs ante actualizaciones).
-- **RT-007:** Node.js LTS requerido para desarrollo.
-- **RT-004:** El frontend proxya `/api` hacia el backend únicamente en entorno de desarrollo; no aplica en la imagen de producción.
+- El equipo debe decidir si el escaneo de vulnerabilidades de la imagen se realizará dentro del `Dockerfile` o como un paso independiente en el pipeline de Jenkins.
+- Queda pendiente definir si se usará una imagen espejo interna para las dependencias de Node por motivos de seguridad corporativa.

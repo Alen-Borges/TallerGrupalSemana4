@@ -1,3 +1,5 @@
+# HU - 006 Original
+
 ## US-006 Dockerización Multi-Stage del Frontend
 
 ### 1. Definición de la HU
@@ -36,3 +38,5 @@
 * [x] Imagen final carente de runtime de Node y código fuente base.
 * [x] Configuración embebida vía `nginx.conf`.
 * [x] Exposición del puerto 5173 funcional mediante script inicial predefinido.
+
+---
