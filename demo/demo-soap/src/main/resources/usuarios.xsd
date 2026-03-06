@@ -20,6 +20,20 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="getUsuariosRequest">
+        <xs:complexType>
+            <xs:sequence/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getUsuariosResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="usuarios" type="tns:UsuarioSoap" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
     <xs:complexType name="UsuarioSoap">
         <xs:sequence>
             <xs:element name="id" type="xs:long"/>
